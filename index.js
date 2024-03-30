@@ -1,9 +1,6 @@
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
-const axios = require('axios');
-const fs = require('fs'); // Module 'fs' pour la gestion des fichiers
-const path = require('path'); // Module 'path' pour la gestion des chemins
 const app = express();
 const mongoose = require('mongoose');
 const hotelRoutes = require('./routes/Hotels');
@@ -30,33 +27,12 @@ mongoose.connection.on('disconnected', () => {
     console.log('Déconnexion de MongoDB');
 });
 
-// Utilise les routes pour les hôtels dans ton application
-app.use('/hotels', hotelRoutes);
-
-// Route pour télécharger une image depuis une URL
-// app.post('/download-image', async (req, res) => {
-//     const { imageUrl } = req.body; // Récupérer l'URL de l'image depuis le corps de la requête
-//     try {
-//         // Télécharger l'image depuis l'URL avec Axios
-//         const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-//         // Générer un nom de fichier unique pour l'image téléchargée
-//         const imageName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.jpg`;
-//         // Chemin où stocker l'image localement (vous pouvez le modifier selon votre structure de dossier)
-//         const imagePath = path.join(__dirname, 'images', imageName);
-//         // Écrire les données de l'image dans un fichier local
-//         fs.writeFileSync(imagePath, Buffer.from(response.data));
-//         // Envoyer une réponse indiquant que l'image a été téléchargée avec succès
-//         res.status(200).json({ message: 'Image téléchargée avec succès', imagePath });
-//     } catch (error) {
-//         // En cas d'erreur, renvoyer une réponse d'erreur
-//         console.error('Erreur lors du téléchargement de l\'image :', error);
-//         res.status(500).json({ error: 'Erreur lors du téléchargement de l\'image' });
-//     }
-// });
-
 // Montage des routes d'authentification
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
+
+// Utilise les routes pour les hôtels dans ton application
+app.use('/hotels', hotelRoutes);
 
 
 // Port d'écoute du serveur

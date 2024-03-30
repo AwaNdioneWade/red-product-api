@@ -46,4 +46,12 @@ router.put('/profile', authMiddleware, (req, res) => {
     });
 });
 
+const passwordResetCtrl = require('../controllers/auth');
+
+// Route pour la demande de réinitialisation de mot de passe
+router.post('/forgot-password', passwordResetCtrl.forgotPassword);
+
+// Route pour la réinitialisation du mot de passe avec un token
+router.post('/reset-password', passwordResetCtrl.resetPassword);
+
 module.exports = router;

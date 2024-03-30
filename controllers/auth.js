@@ -53,3 +53,62 @@ exports.login = async (req, res, next) => {
   }
 }
 
+exports.forgotPassword = async (req, res, next) => {
+  
+  try {
+    const { email } = req.body;
+
+    // Rechercher l'utilisateur dans la base de données par son adresse e-mail
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'Adresse e-mail non trouvée.' });
+    }
+
+    // Générer un token JWT pour réinitialiser le mot de passe
+    const token = jwt.sign({ userId: user._id }, 'RESET_PASSWORD_SECRET', {
+      expiresIn: '1h', // Le token expirera dans 1 heure
+    });
+
+    // Envoyer un e-mail à l'utilisateur avec le lien de réinitialisation
+    // Dans cet exemple, nous supposons que vous utilisez un service de messagerie pour envoyer l'e-mail
+
+    // TODO: Envoyer l'e-mail avec le lien de réinitialisation du mot de passe
+
+    res.status(200).json({ message: 'Un e-mail de réinitialisation du mot de passe a été envoyé à votre adresse.' });
+  } catch (error) {
+    console.error('Erreur lors de la demande de réinitialisation de mot de passe :', error);
+    res.status(500).json({ error: 'Erreur lors de la demande de réinitialisation de mot de passe.' });
+  }
+};
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+
+    // Vérifier si le token est fourni
+    if (!token) {
+      return res.status(400).json({ error: 'Token de réinitialisation du mot de passe manquant.' });
+    }
+
+    // Décoder le token
+    const decodedToken = jwt.verify(token, 'RESET_PASSWORD_SECRET');
+
+    // Rechercher l'utilisateur correspondant au token
+    const user = await User.findById(decodedToken.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé.' });
+    }
+
+    // Hasher le nouveau mot de passe
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Mettre à jour le mot de passe de l'utilisateur
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Mot de passe réinitialisé avec succès.' });
+  } catch (error) {
+    console.error('Erreur lors de la réinitialisation du mot de passe :', error);
+    res.status(500).json({ error: 'Erreur lors de la réinitialisation du mot de passe.' });
+  }
+};
